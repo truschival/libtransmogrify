@@ -3,7 +3,7 @@ MESSAGE(STATUS "Checking ${CMAKE_CURRENT_SOURCE_DIR} ")
 # name of binary (without lib- prefix)
 SET(LIBRARY_NAME "transmog")
 # Interface/binary version
-SET(LIBRARY_VERSION "0.1")
+SET(LIBRARY_VERSION "0.2")
 
 set(SRCS
    ${CMAKE_CURRENT_SOURCE_DIR}/libtransmog.c
