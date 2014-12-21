@@ -3,7 +3,7 @@ MESSAGE(STATUS "Checking ${CMAKE_CURRENT_SOURCE_DIR} ")
 # name of binary (without lib- prefix)
 SET(LIBRARY_NAME "transmog")
 # Interface/binary version
-SET(VERSION "0.1")
+SET(LIBRARY_VERSION "0.1")
 
 set(SRCS
    ${CMAKE_CURRENT_SOURCE_DIR}/libtransmog.c
@@ -30,6 +30,10 @@ SET_TARGET_PROPERTIES(
 # Install
 #-----
 INSTALL(TARGETS ${LIBRARY_NAME} LIBRARY DESTINATION ${TARGET_LIB_INSTALL_DIR} )
+
+INSTALL(DIRECTORY
+   "${PROJECT_INCLUDE_DIR}/${LIBRARY_NAME}"
+   DESTINATION ${TARGET_INC_INSTALL_DIR} FILES_MATCHING PATTERN "*.h")
 
 # Install Pkg-config file
 # pkg-config looks in /usr/lib/pkgconfig

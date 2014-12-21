@@ -4,6 +4,6 @@ includedir=${CMAKE_INSTALL_PREFIX}/${TARGET_INC_INSTALL_DIR}
 
 Name: lib${LIBRARY_NAME}
 Description: Powerful transmogrification library ${CMAKE_PROJECT_NAME}
-Version: ${LIB_VERSION}
+Version: ${LIBRARY_VERSION}
 Libs:  -l${LIBRARY_NAME}
 Cflags:
