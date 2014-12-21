@@ -1,0 +1,26 @@
+MESSAGE(STATUS "Checking ${CMAKE_CURRENT_SOURCE_DIR} ")
+
+# name of binary (without lib- prefix)
+SET(LIBRARY_NAME "transmog")
+# Interface/binary version
+SET(VERSION "0.1")
+
+set(SRCS
+   ${CMAKE_CURRENT_SOURCE_DIR}/libtransmog.c
+)
+
+#-----
+# Build binary
+#-----
+add_library(${LIBRARY_NAME} SHARED ${SRCS})
+
+
+SET_TARGET_PROPERTIES(
+  ${LIBRARY_NAME} PROPERTIES
+  COMPILE_DEFINITIONS "TRANSMOG_MAGIC=${MAGIC_MOJO}"
+  )
+
+#-----
+# Install
+#-----
+INSTALL(TARGETS ${LIBRARY_NAME} LIBRARY DESTINATION ${TARGET_LIB_INSTALL_DIR} )
