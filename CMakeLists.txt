@@ -28,7 +28,7 @@ list(APPEND CMAKE_MODULE_PATH  ${CMAKE_SOURCE_DIR}/CMakeModules/)
 # Project Name
 project (libtransmog)
 # Project Version
-SET(PROJECT_VERSION "0.1")
+SET(PROJECT_VERSION "0.2")
 message(STATUS "")
 message(STATUS "Running ${CMAKE_COMMAND} ${CMAKE_VERSION} on ${CMAKE_PROJECT_NAME} v${PROJECT_VERSION}" )
 
@@ -67,7 +67,7 @@ ENDIF(NOT CMAKE_BUILD_TYPE)
 
 # Special transmogrification factor
 if(NOT MAGIC_MOJO)
-  SET(MAGIC_MOJO 23 CACHE INT "The magic mojo" FORCE )
+  SET(MAGIC_MOJO 7 CACHE INT "The magic mojo" FORCE )
 endif(NOT MAGIC_MOJO)
 
 
