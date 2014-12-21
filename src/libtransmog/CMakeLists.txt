@@ -9,6 +9,12 @@ set(SRCS
    ${CMAKE_CURRENT_SOURCE_DIR}/libtransmog.c
 )
 
+# Create Package config
+configure_file(
+    lib${LIBRARY_NAME}.pc.in
+    ${CMAKE_CURRENT_BINARY_DIR}/lib${LIBRARY_NAME}.pc
+)
+
 #-----
 # Build binary
 #-----
@@ -24,3 +30,8 @@ SET_TARGET_PROPERTIES(
 # Install
 #-----
 INSTALL(TARGETS ${LIBRARY_NAME} LIBRARY DESTINATION ${TARGET_LIB_INSTALL_DIR} )
+
+# Install Pkg-config file
+# pkg-config looks in /usr/lib/pkgconfig
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/lib${LIBRARY_NAME}.pc
+    DESTINATION ${TARGET_LIB_INSTALL_DIR}/pkgconfig/)

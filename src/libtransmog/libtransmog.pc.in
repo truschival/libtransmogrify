@@ -1,0 +1,9 @@
+prefix=${CMAKE_INSTALL_PREFIX}
+libdir=${CMAKE_INSTALL_PREFIX}/${TARGET_LIB_INSTALL_DIR}
+includedir=${CMAKE_INSTALL_PREFIX}/${TARGET_INC_INSTALL_DIR}
+
+Name: lib${LIBRARY_NAME}
+Description: userspace driver library access to fpga-dev ${CMAKE_PROJECT_NAME}
+Version: ${LIB_VERSION}
+Libs:  -l${LIBRARY_NAME}
+Cflags:
