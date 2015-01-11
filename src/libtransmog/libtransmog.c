@@ -1,4 +1,3 @@
-
 /*****************************************************************************/
 /**
  * \file
@@ -8,7 +7,7 @@
 
 #include <stdio.h>
 
-#include "transmog/config.h"
+#include "transmog/version.h"
 #include "transmog/transmog.h"
 
 

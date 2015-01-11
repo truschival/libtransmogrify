@@ -1,6 +1,6 @@
 /**
  * \file
- * \brief
+ * \brief Project definitions
  * \copyright (c) 2014 Thomas Ruschival <thomas@ruschival.de>
  *
  */

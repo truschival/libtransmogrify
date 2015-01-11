@@ -6,15 +6,19 @@ SET(LIBRARY_NAME "transmog")
 SET(LIBRARY_VERSION "0.2")
 
 
-execute_process(
-  COMMAND git rev-parse HEAD
-  OUTPUT_VARIABLE LIBRARY_GIT_COMMIT
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-  )
+if(NOT GIT_COMMIT_HASH)
+  execute_process(
+	COMMAND git rev-parse HEAD
+	OUTPUT_VARIABLE LIBRARY_GIT_COMMIT
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+	OUTPUT_STRIP_TRAILING_WHITESPACE
+	)
+    message(STATUS "${LIBRARY_NAME} at revision ${LIBRARY_GIT_COMMIT}") 
+endif(NOT GIT_COMMIT_HASH)
 
 set(SRCS
   ${CMAKE_CURRENT_SOURCE_DIR}/libtransmog.c
+  ${CMAKE_CURRENT_BINARY_DIR}/version.c
   )
 
 # Create Package config
@@ -25,8 +29,8 @@ configure_file(
 
 # create header file (in src)
 configure_file(
-  ${PROJECT_INCLUDE_DIR}/transmog/config.h.in
-  ${PROJECT_INCLUDE_DIR}/transmog/config.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/version.c.in
+  ${CMAKE_CURRENT_BINARY_DIR}/version.c
   )
 
 #-----
