@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "transmog/transmog.h"
+#include "transmog.h"
 
 #include <string>
 
@@ -19,4 +19,3 @@ TEST(transmog, transmogrify)
 {
     ASSERT_EQ(64+TRANSMOG_MAGIC, tmg_transmogrify(8));
 }
-
