@@ -40,7 +40,6 @@ set_target_properties(
   SOVERSION ${LIBRARY_VERSION}
   )
 
-
 target_compile_definitions(${LIBRARY_NAME}
   PUBLIC
   "FOO_BAR=1"
@@ -84,7 +83,8 @@ INSTALL(TARGETS ${LIBRARY_NAME}
   LIBRARY DESTINATION ${INSTALL_LIB_DIR}
   RUNTIME DESTINATION ${INSTALL_BIN_DIR}
   # this will add -I<prefix>include/transmog to client compile flags
-  INCLUDES DESTINATION ${INSTALL_INCLUDE_DIR}/${COMPONENT_PATH}
+  #INCLUDES DESTINATION ${INSTALL_INCLUDE_DIR}/${COMPONENT_PATH}
+  INCLUDES DESTINATION ${INSTALL_INCLUDE_DIR}
   )
 
 
@@ -110,4 +110,4 @@ INSTALL(
 # Install Pkg-config file
 # pkg-config looks in /usr/lib/pkgconfig
 INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/lib${LIBRARY_NAME}.pc
-    DESTINATION ${TARGET_LIB_INSTALL_DIR}/pkgconfig/)
+    DESTINATION ${INSTALL_LIB_DIR}/pkgconfig/)

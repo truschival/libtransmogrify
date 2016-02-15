@@ -60,8 +60,8 @@ option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." Off)
 IF(NOT CMAKE_BUILD_TYPE)
     #Default to Release-Build
     SET(CMAKE_BUILD_TYPE Release
-	CACHE STRING "Choose the type of build : Debug Release RelWithDebInfo"
-	FORCE)
+		CACHE STRING "Choose the type of build : Debug Release RelWithDebInfo"
+		FORCE)
 ENDIF(NOT CMAKE_BUILD_TYPE)
 
 # Special transmogrification factor
@@ -193,7 +193,7 @@ endif(BUILD_TEST)
 # --------------------------------------------------------------------
 # Generate CPACK installer
 # --------------------------------------------------------------------
-set(CPACK_GENERATOR TGZ)
+#set(CPACK_GENERATOR TGZ)
 set(CPACK_PACKAGE_NAME ${PROJECT_NAME})
 set(CPACK_PACKAGE_VENDOR "Thomas Ruschival")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY ${PROJECT_DESCRIPTION})
