@@ -5,7 +5,8 @@
 
 TEST(transmog, banner)
 {
-  ASSERT_EQ("unknown",std::string(tmg_banner()));
+	ASSERT_EQ("unknown",std::string(tmg_banner()));
+
 }
 
 
