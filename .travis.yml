@@ -1,3 +1,6 @@
+sudo: required
+dist: trusty
+
 language: cpp
 
 compiler:
@@ -14,4 +17,3 @@ script:
 
 after_success:
   - cpack
-  
