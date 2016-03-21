@@ -54,11 +54,11 @@ else(NOT BUILD_GTEST_FROM_SRC)
   # http://stackoverflow.com/questions/9689183/cmake-googletest
   # http://www.kitware.com/media/html/BuildingExternalProjectsWithCMake2.8.html
   #--------------------------------------------------------------------------
-  set(GTEST_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/gtest")
+  set(GTEST_PREFIX "${CMAKE_CURRENT_BINARY_DIR}")
   ExternalProject_Add(
 	GTestExternal
-	URL https://github.com/google/googletest/archive/release-1.7.0.zip
-	# URL https://github.com/google/googlemock/archive/release-1.7.0.zip
+	#URL https://github.com/google/googletest/archive/release-1.7.0.zip
+	GIT_REPOSITORY https://github.com/google/googletest.git
 	# URL_HASH
 	# SVN_REPOSITORY http://googletest.googlecode.com/svn/trunk/
 	# SVN_REVISION -r 700
@@ -72,7 +72,7 @@ else(NOT BUILD_GTEST_FROM_SRC)
 	-DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG:PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
 	-DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE:PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
 	-DBUILD_SHARED_LIBS=Off
-	-DGTEST_HAS_PTHREAD=0
+	-Dgtest_disable_pthreads=On
 	# -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE:PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
 	# -Dgtest_force_shared_crt=ON
 	PREFIX "${GTEST_PREFIX}"
@@ -82,28 +82,48 @@ else(NOT BUILD_GTEST_FROM_SRC)
  	UPDATE_COMMAND ""
  	)
 	ExternalProject_Get_Property(GTestExternal source_dir)
-	include_directories(${source_dir}/include)
-	
+
 	set(LIBPREFIX "${CMAKE_STATIC_LIBRARY_PREFIX}")
 	set(LIBSUFFIX "${CMAKE_STATIC_LIBRARY_SUFFIX}")
 	set(GTEST_LOCATION "${GTEST_PREFIX}/src/GTestExternal-build")
-	set(GTEST_INCLUDES "${GTEST_PREFIX}/src/GTestExternal/include")
+	
+	set(GTEST_INCLUDES "${source_dir}/googletest/include")
+	set(GMOCK_INCLUDES "${source_dir}/googlemock/include")
+	
 	set(GTEST_LIBRARY  "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${LIBPREFIX}gtest${LIBSUFFIX}")
 	set(GTEST_MAINLIB  "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${LIBPREFIX}gtest_main${LIBSUFFIX}")
 
-	add_library(GTest IMPORTED STATIC GLOBAL)
+	set(GMOCK_LIBRARY  "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${LIBPREFIX}gmock${LIBSUFFIX}")
+	set(GMOCK_MAINLIB  "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${LIBPREFIX}gmock_main${LIBSUFFIX}")
 	
+	add_library(GTest IMPORTED STATIC GLOBAL)
 	set_target_properties(GTest PROPERTIES
-		IMPORTED_LOCATION                 "${GTEST_LIBRARY}"
-	#	INTERFACE_INCLUDE_DIRECTORIES     "${GTEST_INCLUDES}"
+		IMPORTED_LOCATION       "${GTEST_LIBRARY}"
+		INTERFACE_INCLUDE_DIRECTORIES     "${GTEST_INCLUDES};${GMOCK_INCLUDES}"
 		IMPORTED_LINK_INTERFACE_LIBRARIES "${CMAKE_THREAD_LIBS_INIT}")
 
 	add_library(GTestMain IMPORTED STATIC GLOBAL)
 	set_target_properties(GTestMain PROPERTIES
-		IMPORTED_LOCATION "${GTEST_MAINLIB}"
-		IMPORTED_LINK_INTERFACE_LIBRARIES  "${GTEST_LIBRARY};${CMAKE_THREAD_LIBS_INIT}")
+		IMPORTED_LOCATION 		"${GTEST_MAINLIB}"
+		#INTERFACE_INCLUDE_DIRECTORIES      "${GTEST_INCLUDES}"
+		IMPORTED_LINK_INTERFACE_LIBRARIES  GTest)
 
+		
+	add_library(GMock IMPORTED STATIC GLOBAL)
+	set_target_properties(GMock PROPERTIES
+		IMPORTED_LOCATION       "${GMOCK_LIBRARY}"
+		INTERFACE_INCLUDE_DIRECTORIES     "${GTEST_INCLUDES};${GMOCK_INCLUDES}"
+		IMPORTED_LINK_INTERFACE_LIBRARIES "${CMAKE_THREAD_LIBS_INIT}")
+
+	add_library(GMockMain IMPORTED STATIC GLOBAL)
+	set_target_properties(GMockMain PROPERTIES
+		IMPORTED_LOCATION 		"${GMOCK_MAINLIB}"
+		#INTERFACE_INCLUDE_DIRECTORIES      "${GTEST_INCLUDES};${GMOCK_INCLUDES}"
+		IMPORTED_LINK_INTERFACE_LIBRARIES  GMock )
+			
 	add_dependencies(GTest GTestExternal)
+	add_dependencies(GMock GTestExternal)
+	
 endif(NOT BUILD_GTEST_FROM_SRC)
 
 
@@ -118,7 +138,8 @@ SET_TARGET_PROPERTIES(
 TARGET_LINK_LIBRARIES(
   ${TEST_BINARY_NAME}
   ${DUT_LIBS}   # Units under test
-  GTestMain # pulls in gtest as linklibrary
+  GMock
+  GMockMain # pulls in gtest as linklibrary
   )
 
 
