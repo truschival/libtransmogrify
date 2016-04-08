@@ -20,29 +20,24 @@ set(SRCS
    ${CMAKE_CURRENT_SOURCE_DIR}/libtransmog.c
 )
 
-# Create Package config (obsolete)
-configure_file(
-    lib${LIBRARY_NAME}.pc.in
-    ${CMAKE_CURRENT_BINARY_DIR}/lib${LIBRARY_NAME}.pc
-)
-
 SET(LIBRARY_COMPILE_DEFINITIONS "TRANSMOG_MAGIC=${MAGIC_MOJO}")
 
 #------------------------------
 # Output a library
 #------------------------------
-ADD_LIBRARY(${LIBRARY_NAME} STATIC ${SRCS})
+ADD_LIBRARY(${LIBRARY_NAME} ${SRCS})
 
 set_target_properties(
   ${LIBRARY_NAME} PROPERTIES
-  COMPILE_DEFINITIONS ${LIBRARY_COMPILE_DEFINITIONS}
   VERSION ${LIBRARY_VERSION}
   SOVERSION ${LIBRARY_VERSION}
   )
 
 target_compile_definitions(${LIBRARY_NAME}
+  PRIVATE
+  $<BUILD_INTERFACE:${LIBRARY_COMPILE_DEFINITIONS}>
   PUBLIC
-  "FOO_BAR=1"
+  $<BUILD_INTERFACE:FOO_BAR=1>
   )
 
 target_include_directories(
@@ -51,13 +46,29 @@ target_include_directories(
   $<BUILD_INTERFACE:${PROJECT_INCLUDE_DIR}>
   PUBLIC
   $<BUILD_INTERFACE:${PROJECT_INCLUDE_DIR}>
-  )
+)
 
-if(CMAKE_COMPILER_IS_GNUXX)  
-target_link_libraries(${LIBRARY_NAME}
-  m #link libmath
-  )
-endif(CMAKE_COMPILER_IS_GNUXX)
+
+##
+# MSVC does not link with libmath
+# Coverage support only for gnu gcov
+##
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+
+  Find_library(COVERAGE_LIB gcov)
+
+  target_link_libraries(${LIBRARY_NAME}
+	m #link libmath
+	)
+
+  if(TEST_COVERAGE)
+	set_target_properties(${LIBRARY_NAME}
+      PROPERTIES
+	  COMPILE_FLAGS " -pg --coverage "
+	  LINK_FLAGS " -pg -O0 --coverage  "
+	  )
+  endif(TEST_COVERAGE)
+endif()
 
 #-----
 # Install
@@ -71,10 +82,20 @@ write_basic_package_version_file(
   COMPATIBILITY SameMajorVersion
 )
 
+
+# Create Package config (obsolete)
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib${LIBRARY_NAME}.pc.in
+    lib${LIBRARY_NAME}.pc
+)
+
 # Configure '<PROJECT-NAME>Config.cmake'
 # Note: variable 'targets_export_name' used
-configure_file("${CMAKE_SOURCE_DIR}/cmake/Config.cmake.in"
-  "${component_config}" @ONLY)
+configure_file(
+  "${CMAKE_SOURCE_DIR}/cmake/Config.cmake.in"
+  "${component_config}"
+  @ONLY
+  )
 
 INSTALL(TARGETS ${LIBRARY_NAME}
   EXPORT ${targets_export_name}
@@ -110,4 +131,5 @@ INSTALL(
 # Install Pkg-config file
 # pkg-config looks in /usr/lib/pkgconfig
 INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/lib${LIBRARY_NAME}.pc
+    COMPONENT DEVELOP
     DESTINATION ${INSTALL_LIB_DIR}/pkgconfig/)

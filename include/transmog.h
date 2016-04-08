@@ -1,9 +1,15 @@
-/**
- * \file
+/*************************************************************************************
+ * \filename
  * \brief
+ *  
+ * \details
  * \copyright (c) 2014 Thomas Ruschival <thomas@ruschival.de>
+ * \author ruschi
+ * 
+ * \since  
  *
- */
+ *************************************************************************************/
+
 
 #ifndef __transmog_H
 #define __transmog_H
@@ -25,10 +31,10 @@ extern "C" {
  */
 int tmg_foo(int a, int b);
 
-/* a^2 */
+/** a^2 */
 int tmg_transmogrify(int a);
 
-/* return the version string */
+/** return the version string */
 const char* tmg_banner();
 
 #ifdef __cplusplus

@@ -29,12 +29,13 @@ list(APPEND CMAKE_MODULE_PATH  ${CMAKE_SOURCE_DIR}/CMakeModules/)
 
 #-------------------------------------------------------------------------------
 # Project Name
-project (LibTransmog CXX C)
+project (LibTransmog VERSION 1.0.8 LANGUAGES CXX C)
 # Some arbitrary hand-maintained version
-set(PROJECT_MAJOR_VERSION 1)
-set(PROJECT_MINOR_VERSION 0)
-set(PROJECT_PATCH_VERSION 7)
-set(PROJECT_VERSION  ${PROJECT_MAJOR_VERSION}.${PROJECT_MINOR_VERSION}.${PROJECT_PATCH_VERSION})
+#set(PROJECT_MAJOR_VERSION 1)
+#set(PROJECT_MINOR_VERSION 0)
+#set(PROJECT_PATCH_VERSION 7)
+#set(PROJECT_VERSION  ${PROJECT_MAJOR_VERSION}.${PROJECT_MINOR_VERSION}.${PROJECT_PATCH_VERSION})
+
 # Some arbitrary project description - only used in doxygen and cpack
 set(PROJECT_DESCRIPTION "Playing around with CMake and GoogleTest")
 message(STATUS "Running ${CMAKE_COMMAND} ${CMAKE_VERSION} on ${CMAKE_PROJECT_NAME} v${PROJECT_VERSION}" )
@@ -45,9 +46,7 @@ message(STATUS "Running ${CMAKE_COMMAND} ${CMAKE_VERSION} on ${CMAKE_PROJECT_NAM
 #-------------------------------------------------------------------------------
 # user Configuration + Defaults
 #-------------------------------------------------------------------------------
-option(BUILD_EXE "Build libtransmog-Tool" Off)
 option(BUILD_TEST "Build Tests" Off)
-option(BUILD_KERNEL_MODS "Build kernel modules" Off)
 option(PROFILE "Build with Profiling" Off)
 option(TEST_COVERAGE "Test Coverage" Off)
 option(INSTALL_UNIT_TEST_ON_TARGET "Install unittests on target rootfs" Off)
@@ -193,7 +192,7 @@ endif(BUILD_TEST)
 # --------------------------------------------------------------------
 # Generate CPACK installer
 # --------------------------------------------------------------------
-#set(CPACK_GENERATOR TGZ)
+set(CPACK_GENERATOR TGZ)
 set(CPACK_PACKAGE_NAME ${PROJECT_NAME})
 set(CPACK_PACKAGE_VENDOR "Thomas Ruschival")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY ${PROJECT_DESCRIPTION})
