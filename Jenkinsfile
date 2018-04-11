@@ -9,7 +9,7 @@ pipeline {
     }
     stage('Build') {
       steps {
-        sh 'cmake -Bbuild -H.'
+        sh 'cmake -Bbuild -H. -DBUILD_TEST=On -DBUILD_GTEST_FROM_SRC=On'
         sh 'cmake --build build --target all'
       }
     }
