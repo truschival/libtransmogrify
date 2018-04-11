@@ -16,7 +16,7 @@ pipeline {
     stage('Test') {
       steps {
         sh 'cmake --build build --target test'
-        junit 'build/test/gtestresult.xml'
+        junit 'build/test/gtestresults.xml'
       }
     }
   }
