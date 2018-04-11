@@ -9,8 +9,8 @@ pipeline {
     }
     stage('Build') {
       steps {
-        sh 'cmake -B build -H ~/src'
-        sh 'cmake --build -B build'
+        sh 'cmake -Bbuild -H.'
+        sh 'cmake --build build --target all'
       }
     }
   }
