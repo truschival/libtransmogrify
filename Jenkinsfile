@@ -13,5 +13,11 @@ pipeline {
         sh 'cmake --build build --target all'
       }
     }
+    stage('Test') {
+      steps {
+        sh 'cmake --build build --target test'
+        junit 'build/test/gtestresult.xml'
+      }
+    }
   }
 }
