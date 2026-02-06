@@ -75,19 +75,32 @@ if(HAS_GCOV GREATER -1 OR HAS_LLVM_COV GREATER -1)
 
         if(GCOVR_PATH)
             add_custom_target(coverage_report
-                COMMAND ${GCOVR_PATH} -r ${CMAKE_SOURCE_DIR} . --html-details -o coverage.html
+                COMMAND ${GCOVR_PATH} -r ${CMAKE_SOURCE_DIR} . 
+                        --html-details -o coverage.html
+                        --exclude-directories "${CMAKE_SOURCE_DIR}/test"
+                        --exclude-directories "${CMAKE_SOURCE_DIR}/build"
+                        --exclude ".*/test/.*"
+                        --exclude "/usr/.*"
                 WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
                 COMMENT "Generating HTML report using gcovr"
             )
-          message(STATUS "HTML report generated using gcovr")
+          message(STATUS "HTML report target created using gcovr")
         elseif(LCOV_PATH)
             add_custom_target(coverage_report
-                COMMAND ${LCOV_PATH} --capture --directory . --ignore-errors inconsistent --output-file coverage.info
-                COMMAND genhtml coverage.info --output-directory coverage_report
+                # Capture coverage data
+                COMMAND ${LCOV_PATH} --capture --directory . 
+                        --ignore-errors inconsistent 
+                        --output-file coverage.info
+                # Remove unwanted files (STL, tests, dependencies)
+                COMMAND ${LCOV_PATH} --remove coverage.info '/usr/*' '*/test/*' '*/_deps/*' '*/v1/*'
+                        --ignore-errors unused 
+                        --output-file coverage.info.filtered
+                # Generate HTML report
+                COMMAND genhtml coverage.info.filtered --output-directory coverage_report
                 WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
                 COMMENT "Generating HTML report using lcov"
             )
-          message(STATUS "HTML report generated using lcov")
+          message(STATUS "HTML report target created using lcov")
         endif()
 
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -101,14 +114,15 @@ if(HAS_GCOV GREATER -1 OR HAS_LLVM_COV GREATER -1)
                 # Merge the raw profile data
                 COMMAND ${LLVM_PROFDATA} merge -sparse default.profraw -o coverage.profdata
                 # Generate the HTML report
-                COMMAND ${LLVM_COV} show $<TARGET_FILE:${PROJECT_NAME}> 
+                COMMAND ${LLVM_COV} show $<TARGET_FILE:${TEST_BINARY_NAME}> 
                         -instr-profile=coverage.profdata 
                         -show-line-counts-or-regions
+                        -ignore-filename-regex="/usr/include/.*|.*/test/.*"
                         -output-dir=coverage_report -format=html
                 WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
                 COMMENT "Generating HTML report using llvm-cov"
             )
-          message(STATUS "HTML report generated using llvm-cov")
+          message(STATUS "HTML report target created using llvm-cov")
         endif()
     endif()
 endif()
