@@ -1,5 +1,4 @@
-libtransmogrify
-===============
+# libtransmogrify
 
 Playground for gtest, cmake serves as demo for a buildroot package
 
@@ -9,12 +8,23 @@ Playground for gtest, cmake serves as demo for a buildroot package
 - Release (default)
 - RelWithDebInfo
 
-## Options & Defaults (compilation flags & targets)
+## Options & Defaults
 
-- -DBUILD_TEST=OFF      (build google test)  
-                        requires GTest installed as library or `-DBUILD_GTEST_FROM_SRC=On`
-- -DBUILD_GTEST_FROM_SRC=Off (recompile gtest as external project)
-- -DMAGIC_MOJO=19       (some compile time int)
-- -DPROFILE=Off         (profiling)
-- -DTEST_COVERAGE=Off   (code coverage)
-- -DINSTALL_UNIT_TEST_ON_TARGET=Off (install unittest on target rootfs)
+- -DBUILD_TEST=OFF   (build with unit tests)
+- -DMAGIC_MOJO=19    (some compile time int)
+
+## Build
+
+```shell
+conan install  . -pr gcc -pr coverage --build=missing -c tools.cmake.cmaketoolchain:generator="Unix Makefiles"  -o BUILD_TEST=True
+
+
+cmake -B build/Debug -S . -DBUILD_TEST=On
+cmake --build  build/Debug -t 
+cmake --build  build/Debug -t coverage_report
+``` 
+
+
+
+
+

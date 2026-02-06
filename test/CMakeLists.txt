@@ -1,4 +1,5 @@
-MESSAGE(STATUS "Checking ${CMAKE_CURRENT_SOURCE_DIR} ")
+list(APPEND CMAKE_MESSAGE_INDENT " ")
+message(STATUS ">> ${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_CURRENT_LIST_FILE}")
 
 # Threading library for gtest
 # Use ${CMAKE_THREAD_LIBS_INIT} for the library
@@ -14,17 +15,12 @@ SET(TEST_HARNESS_SRCS
 #--------------------------------------------------------------------------------
 # Add libraries to test here
 #--------------------------------------------------------------------------------
-#------------------------------
-# Import Arduino core
-#------------------------------
 
 SET(DUT_LIBS "")
-if(TARGET transmog)
-  add_library(LibTransmog::transmog ALIAS transmog)
-else()
-    find_package(LibTransmog COMPONENTS transmog CONFIG REQUIRED)
+if(TARGET transmogrify)
+  add_library(transmogrify::transmogrify ALIAS transmogrify)
+  LIST(APPEND DUT_LIBS transmogrify::transmogrify)
 endif()
-LIST(APPEND DUT_LIBS LibTransmog::transmog)
 
 SET(TEST_BINARY_NAME "${PROJECT_NAME}_gtest")
 
@@ -35,7 +31,7 @@ add_executable(${TEST_BINARY_NAME} ${TEST_HARNESS_SRCS} )
 include(FetchContent)
 FetchContent_Declare(
   googletest
-  URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+  URL https://github.com/google/googletest/releases/download/v1.17.0/googletest-1.17.0.tar.gz
 )
 FetchContent_MakeAvailable(googletest)
 
@@ -54,16 +50,68 @@ TARGET_LINK_LIBRARIES(
   )
 
 
-if(TEST_COVERAGE)
-  TARGET_LINK_LIBRARIES (${TEST_BINARY_NAME}  ${COVERAGE_LIB} )
-endif(TEST_COVERAGE)
-
 include(GoogleTest)
 gtest_discover_tests(  ${TEST_BINARY_NAME}
   PROPERTIES
 	XML_OUTPUT_DIR  "${CMAKE_BINARY_DIR}/testresults/"
   )
 
-if(INSTALL_UNIT_TEST_ON_TARGET)
-  INSTALL(TARGETS  ${TEST_BINARY_NAME} RUNTIME DESTINATION ${TARGET_EXE_INSTALL_DIR} )
-endif(INSTALL_UNIT_TEST_ON_TARGET)
+# -------------------------------------------------------------------
+# COVERAGE LOGIC
+# -------------------------------------------------------------------
+
+# We check if coverage flags are present in the CXX_FLAGS 
+# (which Conan injected via the profile)
+string(FIND "${CMAKE_CXX_FLAGS}" "--coverage" HAS_GCOV)
+string(FIND "${CMAKE_CXX_FLAGS}" "-fprofile-instr-generate" HAS_LLVM_COV)
+
+if(HAS_GCOV GREATER -1 OR HAS_LLVM_COV GREATER -1)
+    message(STATUS "Coverage instrumentation detected. Setting up report targets...")
+
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" OR HAS_GCOV GREATER -1)
+        # --- GCC / LCOV / GCOVR Path ---
+        find_program(GCOVR_PATH gcovr)
+        find_program(LCOV_PATH lcov)
+
+        if(GCOVR_PATH)
+            add_custom_target(coverage_report
+                COMMAND ${GCOVR_PATH} -r ${CMAKE_SOURCE_DIR} . --html-details -o coverage.html
+                WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+                COMMENT "Generating HTML report using gcovr"
+            )
+          message(STATUS "HTML report generated using gcovr")
+        elseif(LCOV_PATH)
+            add_custom_target(coverage_report
+                COMMAND ${LCOV_PATH} --capture --directory . --ignore-errors inconsistent --output-file coverage.info
+                COMMAND genhtml coverage.info --output-directory coverage_report
+                WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+                COMMENT "Generating HTML report using lcov"
+            )
+          message(STATUS "HTML report generated using lcov")
+        endif()
+
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        # --- Native Clang / LLVM-COV Path ---
+        find_program(LLVM_PROFDATA llvm-profdata)
+        find_program(LLVM_COV llvm-cov)
+
+        if(LLVM_PROFDATA AND LLVM_COV)
+            # Note: default.profraw is generated when you RUN the binary
+            add_custom_target(coverage_report
+                # Merge the raw profile data
+                COMMAND ${LLVM_PROFDATA} merge -sparse default.profraw -o coverage.profdata
+                # Generate the HTML report
+                COMMAND ${LLVM_COV} show $<TARGET_FILE:${PROJECT_NAME}> 
+                        -instr-profile=coverage.profdata 
+                        -show-line-counts-or-regions
+                        -output-dir=coverage_report -format=html
+                WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+                COMMENT "Generating HTML report using llvm-cov"
+            )
+          message(STATUS "HTML report generated using llvm-cov")
+        endif()
+    endif()
+endif()
+
+message(STATUS "<< ${CMAKE_CURRENT_LIST_FILE}")
+list(POP_BACK CMAKE_MESSAGE_INDENT " ")
