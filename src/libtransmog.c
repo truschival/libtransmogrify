@@ -6,13 +6,13 @@
 #include <stdio.h>
 
 #include "config.h"
-#include "transmog.h"
+#include "transmogrify.h"
 
 
 /*****************************************************************************/
 const char* tmg_banner()
 {
-    return TRANSMOG_VERSION;
+    return CMAKE_PROJECT_VERSION;
 }
 /*****************************************************************************/
 
@@ -26,4 +26,10 @@ int tmg_transmogrify(int a)
 int tmg_foo(int a, int b)
 {
     return a + b - TRANSMOG_MAGIC;
+}
+
+/*****************************************************************************/
+const char* tmg_git_revision()
+{
+    return GIT_DESCRIBE_REV;
 }

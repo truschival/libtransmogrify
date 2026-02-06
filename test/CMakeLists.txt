@@ -29,83 +29,15 @@ LIST(APPEND DUT_LIBS LibTransmog::transmog)
 SET(TEST_BINARY_NAME "${PROJECT_NAME}_gtest")
 
 #--------------------------------------------------------------------------------
-# Google Test as external project
-# Why - see http://code.google.com/p/googletest/wiki/FAQ#
-# How - borrowed form stackexchange
-#		(http://stackoverflow.com/questions/9689183/cmake-googletest)
-# http://www.kitware.com/media/html/BuildingExternalProjectsWithCMake2.8.html
-#--------------------------------------------------------------------------------
 # UnitTests Executable (for target)
 add_executable(${TEST_BINARY_NAME} ${TEST_HARNESS_SRCS} )
 
-if(NOT BUILD_GTEST_FROM_SRC)
-  # Use prebuilt google_test
-  find_package(GTest REQUIRED)
-
-else(NOT BUILD_GTEST_FROM_SRC)
-  # If Google Test is compiled from source
-  include(ExternalProject)
-
-  #--------------------------------------------------------------------------
-  # Google Test as external project
-  # Why - see http://code.google.com/p/googletest/wiki/FAQ#
-  # How - borrowed form stackexchange
-  #		(http://stackoverflow.com/questions/9689183/cmake-googletest)
-  # http://stackoverflow.com/questions/9689183/cmake-googletest
-  # http://www.kitware.com/media/html/BuildingExternalProjectsWithCMake2.8.html
-  #--------------------------------------------------------------------------
-  set(GTEST_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/gtest")
-  ExternalProject_Add(
-	GTestExternal
-	URL https://github.com/google/googletest/archive/release-1.7.0.zip
-	# URL https://github.com/google/googlemock/archive/release-1.7.0.zip
-	# URL_HASH
-	# SVN_REPOSITORY http://googletest.googlecode.com/svn/trunk/
-	# SVN_REVISION -r 700
-	TIMEOUT 10
-	# PATCH_COMMMAND "" # Thomas: empty patch we dont patch google test
-	# PATCH_COMMAND svn patch ${CMAKE_SOURCE_DIR}/gtest.patch
-	#			${CMAKE_BINARY_DIR}/ThirdParty/src/googletest
-	# Force separate output paths for debug and release builds to allow easy
-	# identification of correct lib in subsequent TARGET_LINK_LIBRARIES commands
-	CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-	-DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG:PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-	-DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE:PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-	-DBUILD_SHARED_LIBS=Off
-	-DGTEST_HAS_PTHREAD=0
-	# -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE:PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-	# -Dgtest_force_shared_crt=ON
-	PREFIX "${GTEST_PREFIX}"
-	# Disable install step
-	INSTALL_COMMAND ""
-	# Empty update command to speed up make - we don't need to constantly check
- 	UPDATE_COMMAND ""
- 	)
-	ExternalProject_Get_Property(GTestExternal source_dir)
-	include_directories(${source_dir}/include)
-	
-	set(LIBPREFIX "${CMAKE_STATIC_LIBRARY_PREFIX}")
-	set(LIBSUFFIX "${CMAKE_STATIC_LIBRARY_SUFFIX}")
-	set(GTEST_LOCATION "${GTEST_PREFIX}/src/GTestExternal-build")
-	set(GTEST_INCLUDES "${GTEST_PREFIX}/src/GTestExternal/include")
-	set(GTEST_LIBRARY  "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${LIBPREFIX}gtest${LIBSUFFIX}")
-	set(GTEST_MAINLIB  "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${LIBPREFIX}gtest_main${LIBSUFFIX}")
-
-	add_library(GTest IMPORTED STATIC GLOBAL)
-	
-	set_target_properties(GTest PROPERTIES
-		IMPORTED_LOCATION                 "${GTEST_LIBRARY}"
-	#	INTERFACE_INCLUDE_DIRECTORIES     "${GTEST_INCLUDES}"
-		IMPORTED_LINK_INTERFACE_LIBRARIES "${CMAKE_THREAD_LIBS_INIT}")
-
-	add_library(GTestMain IMPORTED STATIC GLOBAL)
-	set_target_properties(GTestMain PROPERTIES
-		IMPORTED_LOCATION "${GTEST_MAINLIB}"
-		IMPORTED_LINK_INTERFACE_LIBRARIES  "${GTEST_LIBRARY};${CMAKE_THREAD_LIBS_INIT}")
-
-	add_dependencies(GTest GTestExternal)
-endif(NOT BUILD_GTEST_FROM_SRC)
-
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+)
+FetchContent_MakeAvailable(googletest)
 
 SET_TARGET_PROPERTIES(
   ${TEST_BINARY_NAME}
@@ -118,7 +50,7 @@ SET_TARGET_PROPERTIES(
 TARGET_LINK_LIBRARIES(
   ${TEST_BINARY_NAME}
   ${DUT_LIBS}   # Units under test
-  GTestMain # pulls in gtest as linklibrary
+  GTest::gtest_main
   )
 
 
@@ -126,9 +58,11 @@ if(TEST_COVERAGE)
   TARGET_LINK_LIBRARIES (${TEST_BINARY_NAME}  ${COVERAGE_LIB} )
 endif(TEST_COVERAGE)
 
-# Call the testBinary with junit-xml output
-add_test(junitout "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TEST_BINARY_NAME}"
-  --gtest_output=xml:gtestresults.xml )
+include(GoogleTest)
+gtest_discover_tests(  ${TEST_BINARY_NAME}
+  PROPERTIES
+	XML_OUTPUT_DIR  "${CMAKE_BINARY_DIR}/testresults/"
+  )
 
 if(INSTALL_UNIT_TEST_ON_TARGET)
   INSTALL(TARGETS  ${TEST_BINARY_NAME} RUNTIME DESTINATION ${TARGET_EXE_INSTALL_DIR} )

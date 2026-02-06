@@ -1,11 +1,13 @@
 #include <gtest/gtest.h>
-#include "transmog.h"
+#include "transmogrify.h"
+#include "config.h"
 
 #include <string>
 
 TEST(transmog, banner)
 {
-  ASSERT_EQ("unknown",std::string(tmg_banner()));
+  ASSERT_GT(std::string(tmg_banner()).length(),0);
+  ASSERT_EQ(std::string(tmg_banner()), CMAKE_PROJECT_VERSION);
 }
 
 
