@@ -76,6 +76,9 @@ if(NOT CMAKE_BUILD_TYPE)
         FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
 
+# Build tests option
+option(BUILD_TEST "Build and run unit tests" ON)
+
 # Special transmogrification factor
 if(NOT MAGIC_MOJO)
     set(MAGIC_MOJO 23 CACHE INT "The magic mojo" FORCE)
