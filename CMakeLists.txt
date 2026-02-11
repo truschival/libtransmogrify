@@ -77,7 +77,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif(NOT CMAKE_BUILD_TYPE)
 
 # Build tests option
-option(BUILD_TEST "Build and run unit tests" ON)
+option(BUILD_TEST "Build and run unit tests" OFF)
 
 # Special transmogrification factor
 if(NOT MAGIC_MOJO)

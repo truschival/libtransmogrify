@@ -23,7 +23,7 @@ class LibtransmogrifyRecipe(ConanFile):
         "fPIC": [True, False],
         "BUILD_TEST": [True, False],
     }
-    default_options = {"shared": True, "fPIC": True, "BUILD_TEST": True}
+    default_options = {"shared": True, "fPIC": True, "BUILD_TEST": False}
 
     # Sources are located in the same place as this recipe, copy them to the recipe
     exports_sources = [
@@ -34,6 +34,7 @@ class LibtransmogrifyRecipe(ConanFile):
         "README.md",
         "src/*",
         "include/*",
+        "test/*",
     ]
 
     def set_version(self):
@@ -91,20 +92,18 @@ class LibtransmogrifyRecipe(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)
+        tc.cache_variables['CONAN_PROJECT_VERSION'] = self.version
+        tc.cache_variables['CONAN_GIT_DESCRIBE_REV'] = self.conan_data.get('git_describe_rev', 'XXX')
+        tc.cache_variables['BUILD_TEST'] = self.options.BUILD_TEST
         tc.generate()
 
     def build(self):
         # Now run CMake normally - provide dummy variables to skip git detection
         cmake = CMake(self)
-        cmake.configure(
-            variables={
-                "CONAN_PROJECT_VERSION": self.version,
-                "CONAN_GIT_DESCRIBE_REV": self.conan_data.get(
-                    "git_describe_rev", "XXX"
-                ),
-            }
-        )
+        cmake.configure()
         cmake.build()
+        if self.options.BUILD_TEST:
+            cmake.test()
 
     def package(self):
         cmake = CMake(self)

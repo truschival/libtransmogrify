@@ -26,7 +26,8 @@ set(TEST_BINARY_NAME "${PROJECT_NAME}_gtest")
 
 #--------------------------------------------------------------------------------
 include(FetchContent)
-
+# Avoid installing gtest to the system, we just want it for testing
+set(INSTALL_GTEST OFF CACHE BOOL "Disable installation of googletest" FORCE)
 # Download and setup GoogleTest
 FetchContent_Declare(
         googletest
